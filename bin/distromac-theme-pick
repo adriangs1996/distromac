@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/.distromac}"
+
+# Preview function: render color blocks from colors.toml
+preview_theme() {
+  local theme="$1"
+  local colors_file=""
+
+  if [[ -f "$HOME/.config/distromac/themes/$theme/colors.toml" ]]; then
+    colors_file="$HOME/.config/distromac/themes/$theme/colors.toml"
+  elif [[ -f "$DISTROMAC_PATH/themes/$theme/colors.toml" ]]; then
+    colors_file="$DISTROMAC_PATH/themes/$theme/colors.toml"
+  fi
+
+  if [[ -z $colors_file ]]; then
+    echo "No colors.toml found"
+    return
+  fi
+
+  while IFS='=' read -r key value; do
+    [[ $key =~ ^[[:space:]]*# ]] && continue
+    [[ -z $key ]] && continue
+
+    key=$(echo "$key" | xargs)
+    value=$(echo "$value" | xargs | sed 's/^"//;s/"$//' | xargs)
+    [[ -z $value ]] && continue
+
+    # Only render hex colors
+    [[ ! $value =~ ^# ]] && continue
+
+    local hex="${value#\#}"
+    local r=$((16#${hex:0:2}))
+    local g=$((16#${hex:2:2}))
+    local b=$((16#${hex:4:2}))
+
+    printf "\033[48;2;%d;%d;%dm  ████  \033[0m  %-25s %s\n" "$r" "$g" "$b" "$key" "$value"
+  done < "$colors_file"
+}
+
+export -f preview_theme
+export DISTROMAC_PATH
+
+selected=$(distromac-theme-list | fzf \
+  --preview "bash -c 'preview_theme {}'" \
+  --preview-window=right:50% \
+  --header="Select a theme (Enter to apply, Esc to cancel)" \
+  --prompt="Theme > ")
+
+if [[ -n $selected ]]; then
+  distromac-theme-set "$selected"
+fi

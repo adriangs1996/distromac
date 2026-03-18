@@ -1,0 +1,227 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Aurora Depths - Purple Edition - LSD Colors
+# Sophisticated purple-first palette with WCAG AA compliance
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# Installation:
+#   mkdir -p ~/.config/lsd
+#   cp colors.yaml ~/.config/lsd/colors.yaml
+#
+# Reference:
+#   https://github.com/lsd-rs/lsd#color-theme
+# ──────────────────────────────────────────────────────────────────────────────
+
+# User and Group
+user: "#c4b5f0"           # Purple - current user
+group: "#f0a0c8"          # Pink - group
+
+# Permissions
+permission:
+  read: "#a8d4a8"         # Sage - read permission
+  write: "#e8d088"        # Yellow - write permission
+  exec: "#e88090"         # Coral - execute permission
+  exec-sticky: "#c4a8ff"  # Violet (AAA) - sticky exec
+  no-access: "#686480"    # fg3 - no permission
+  octal: "#88c4f0"        # Sky - octal display
+  acl: "#e0a8c0"          # Rose - ACL indicator
+  context: "#908ca4"      # fg2 - SELinux context
+
+# File sizes
+size:
+  none: "#686480"         # fg3 - empty/none
+  small: "#a8d4a8"        # Sage - small files
+  medium: "#e8d088"       # Yellow - medium files
+  large: "#e8a888"        # Peach - large files
+
+# Date/Time
+date:
+  hour-old: "#8ce0a0"     # Mint - very recent
+  day-old: "#c4b5f0"      # Purple - recent
+  older: "#908ca4"        # fg2 - older files
+
+# Git status
+git-status:
+  default: "#686480"      # fg3
+  unmodified: "#686480"   # fg3
+  ignored: "#4a4565"      # bg4
+  new-in-index: "#8ce0a0" # Mint - staged new
+  new-in-workdir: "#a8d4a8" # Sage - untracked
+  typechange: "#7dd3d0"   # Cyan - type changed
+  deleted: "#f0a0a8"      # Coral (AAA) - deleted
+  renamed: "#f0a0c8"      # Pink - renamed
+  modified: "#e8d088"     # Yellow - modified
+  conflicted: "#f0a0a8"   # Coral (AAA) - conflicts
+
+# Symlinks
+links:
+  valid: "#c4b5f0"        # Purple - valid symlink
+  invalid: "#f0a0a8"      # Coral (AAA) - broken symlink
+
+# INode (unique file identifier)
+inode:
+  valid: "#a78bfa"        # Violet
+  invalid: "#f0a0a8"      # Coral (AAA)
+
+# Tree structure
+tree-edge: "#4a4565"      # bg4 - tree lines
+
+# File types
+filetype:
+  file:
+    default: "#e8e6f0"    # fg0 - regular files
+    empty: "#686480"      # fg3 - empty files
+  dir:
+    default: "#c4b5f0"    # Purple - directories
+    empty: "#686480"      # fg3 - empty directories
+  pipe: "#e8d088"         # Yellow - named pipes
+  socket: "#7dd3d0"       # Cyan - sockets
+  block-device: "#e8a888" # Peach - block devices
+  char-device: "#e8a888"  # Peach - character devices
+  special: "#e0a8c0"      # Rose - special files
+
+# Extensions by category
+# Media files
+extension:
+  # Images
+  png: "#f0a0c8"          # Pink
+  jpg: "#f0a0c8"
+  jpeg: "#f0a0c8"
+  gif: "#f0a0c8"
+  webp: "#f0a0c8"
+  svg: "#f0a0c8"
+  ico: "#f0a0c8"
+  bmp: "#f0a0c8"
+  tiff: "#f0a0c8"
+
+  # Video
+  mp4: "#e0a8c0"          # Rose
+  mkv: "#e0a8c0"
+  avi: "#e0a8c0"
+  mov: "#e0a8c0"
+  webm: "#e0a8c0"
+  flv: "#e0a8c0"
+
+  # Audio
+  mp3: "#a78bfa"          # Violet
+  flac: "#a78bfa"
+  wav: "#a78bfa"
+  ogg: "#a78bfa"
+  m4a: "#a78bfa"
+  aac: "#a78bfa"
+
+  # Documents
+  pdf: "#e88090"          # Coral
+  doc: "#88c4f0"          # Sky
+  docx: "#88c4f0"
+  xls: "#8ce0a0"          # Mint
+  xlsx: "#8ce0a0"
+  ppt: "#e8a888"          # Peach
+  pptx: "#e8a888"
+  odt: "#88c4f0"
+  ods: "#8ce0a0"
+  odp: "#e8a888"
+
+  # Archives
+  zip: "#e8a888"          # Peach
+  tar: "#e8a888"
+  gz: "#e8a888"
+  bz2: "#e8a888"
+  xz: "#e8a888"
+  zst: "#e8a888"
+  7z: "#e8a888"
+  rar: "#e8a888"
+  deb: "#e8a888"
+  rpm: "#e8a888"
+  dmg: "#e8a888"
+
+  # Source code - Programming languages
+  rs: "#e8a888"           # Peach - Rust
+  go: "#7dd3d0"           # Cyan - Go
+  py: "#e8d088"           # Yellow - Python
+  rb: "#e88090"           # Coral - Ruby
+  js: "#e8d088"           # Yellow - JavaScript
+  ts: "#88c4f0"           # Sky - TypeScript
+  jsx: "#c4b5f0"          # Purple - JSX
+  tsx: "#c4b5f0"          # Purple - TSX
+  java: "#e8a888"         # Peach - Java
+  kt: "#a78bfa"           # Violet - Kotlin
+  swift: "#e8a888"        # Peach - Swift
+  c: "#908ca4"            # fg2 - C
+  cpp: "#908ca4"          # fg2 - C++
+  h: "#908ca4"            # fg2 - Headers
+  hpp: "#908ca4"
+  lua: "#88c4f0"          # Sky - Lua
+  ex: "#c4b5f0"           # Purple - Elixir
+  exs: "#c4b5f0"
+  erl: "#c4b5f0"          # Purple - Erlang
+  hs: "#c4b5f0"           # Purple - Haskell
+  php: "#a78bfa"          # Violet - PHP
+  scala: "#e88090"        # Coral - Scala
+  zig: "#e8a888"          # Peach - Zig
+  nim: "#e8d088"          # Yellow - Nim
+  v: "#88c4f0"            # Sky - V
+  dart: "#7dd3d0"         # Cyan - Dart
+  cs: "#a78bfa"           # Violet - C#
+  fs: "#88c4f0"           # Sky - F#
+  ml: "#e8a888"           # Peach - OCaml
+  clj: "#8ce0a0"          # Mint - Clojure
+  cljs: "#8ce0a0"
+
+  # Web
+  html: "#f0a0c8"         # Pink
+  htm: "#f0a0c8"
+  css: "#88c4f0"          # Sky
+  scss: "#f0a0c8"         # Pink
+  sass: "#f0a0c8"
+  less: "#88c4f0"
+  vue: "#8ce0a0"          # Mint
+  svelte: "#e8a888"       # Peach
+
+  # Config and data
+  json: "#e8d088"         # Yellow
+  yaml: "#e8d088"
+  yml: "#e8d088"
+  toml: "#e8d088"
+  xml: "#e8d088"
+  ini: "#e8d088"
+  conf: "#e8d088"
+  config: "#e8d088"
+
+  # Shell and scripts
+  sh: "#8ce0a0"           # Mint
+  bash: "#8ce0a0"
+  zsh: "#8ce0a0"
+  fish: "#8ce0a0"
+
+  # Text and documentation
+  md: "#c4b5f0"           # Purple - Markdown
+  markdown: "#c4b5f0"
+  txt: "#c4c0d4"          # fg1 - Plain text
+  rst: "#c4b5f0"          # Purple - reStructuredText
+  org: "#8ce0a0"          # Mint - Org mode
+  tex: "#a8d4a8"          # Sage - LaTeX
+  log: "#686480"          # fg3 - Log files
+
+  # Database
+  sql: "#7dd3d0"          # Cyan
+  sqlite: "#7dd3d0"
+  db: "#7dd3d0"
+
+  # Build and lock files
+  lock: "#686480"         # fg3
+  Makefile: "#8ce0a0"     # Mint
+  Dockerfile: "#7dd3d0"   # Cyan
+  Containerfile: "#7dd3d0"
+
+  # Git
+  gitignore: "#686480"    # fg3
+  gitattributes: "#686480"
+  gitmodules: "#686480"
+
+  # Nix
+  nix: "#88c4f0"          # Sky
+
+  # Misc
+  env: "#e8d088"          # Yellow - Environment files
+  license: "#908ca4"      # fg2
+  readme: "#c4b5f0"       # Purple

@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/.distromac}"
+CURRENT_DIR="$HOME/.config/distromac/current"
+THEME_NAME="${1:?Usage: distromac-theme-set <theme-name>}"
+
+# 1. Validate theme exists (in at least one location)
+OFFICIAL_DIR="$DISTROMAC_PATH/themes/$THEME_NAME"
+USER_DIR="$HOME/.config/distromac/themes/$THEME_NAME"
+
+if [[ ! -d $OFFICIAL_DIR ]] && [[ ! -d $USER_DIR ]]; then
+  echo "Error: Theme '$THEME_NAME' not found." >&2
+  echo "Available themes: $(distromac-theme-list)" >&2
+  exit 1
+fi
+
+# 2. Create next-theme staging directory
+mkdir -p "$CURRENT_DIR"
+rm -rf "$CURRENT_DIR/next-theme"
+mkdir -p "$CURRENT_DIR/next-theme"
+
+# 3. Copy official theme first (base)
+if [[ -d $OFFICIAL_DIR ]]; then
+  cp -r "$OFFICIAL_DIR"/. "$CURRENT_DIR/next-theme/"
+fi
+
+# 4. Copy user overrides on top (overlay — user wins)
+if [[ -d $USER_DIR ]]; then
+  cp -r "$USER_DIR"/. "$CURRENT_DIR/next-theme/"
+fi
+
+# 5. Generate configs from templates
+distromac-theme-set-templates
+
+# 6. Atomic swap
+rm -rf "$CURRENT_DIR/theme"
+mv "$CURRENT_DIR/next-theme" "$CURRENT_DIR/theme"
+
+# 7. Deploy themed configs to app locations
+# bat
+if [[ -f "$CURRENT_DIR/theme/bat" ]]; then
+  mkdir -p "$HOME/.config/bat"
+  cp "$CURRENT_DIR/theme/bat" "$HOME/.config/bat/config"
+fi
+
+# lsd
+if [[ -f "$CURRENT_DIR/theme/lsd-colors.yaml" ]]; then
+  mkdir -p "$HOME/.config/lsd"
+  cp "$CURRENT_DIR/theme/lsd-colors.yaml" "$HOME/.config/lsd/colors.yaml"
+fi
+
+# starship
+if [[ -f "$CURRENT_DIR/theme/starship.toml" ]]; then
+  base_config="$DISTROMAC_PATH/config/starship/starship.toml"
+  if [[ -f "$base_config" ]]; then
+    mkdir -p "$HOME/.config/starship"
+    cat "$base_config" "$CURRENT_DIR/theme/starship.toml" > "$HOME/.config/starship/starship.toml"
+  fi
+fi
+
+# nvim: deploy theme.lua BEFORE writing theme.name (nvim watches theme.name)
+if [[ -f "$CURRENT_DIR/theme/nvim.lua" ]]; then
+  mkdir -p "$HOME/.config/nvim/lua/distromac"
+  cp "$CURRENT_DIR/theme/nvim.lua" "$HOME/.config/nvim/lua/distromac/theme.lua"
+fi
+
+# 8. Store theme name (triggers nvim fs_event watcher)
+echo "$THEME_NAME" > "$CURRENT_DIR/theme.name"
+
+# 9. Set wallpaper if exists
+for wallpaper in "$CURRENT_DIR/theme"/wallpaper.{png,jpg,jpeg}; do
+  if [[ -f $wallpaper ]]; then
+    osascript -e "tell application \"System Events\" to tell every desktop to set picture to \"$wallpaper\""
+    break
+  fi
+done
+
+# 10. Reload all themed components
+distromac-restart-sketchybar
+distromac-restart-borders
+distromac-restart-aerospace
+
+# Ghostty: SIGUSR2 triggers config reload
+if pgrep -x ghostty &>/dev/null; then
+  pkill -USR2 -x ghostty 2>/dev/null || true
+fi
+
+# tmux: source config if running
+if tmux list-sessions &>/dev/null 2>&1; then
+  tmux source-file ~/.tmux.conf 2>/dev/null || true
+fi
+
+# bat: rebuild cache
+if command -v bat &>/dev/null; then
+  bat cache --build &>/dev/null || true
+fi
+
+# 11. Run hook
+distromac-hook theme-set "$THEME_NAME" || true
+
+echo "Theme set to: $THEME_NAME"

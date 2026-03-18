@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+if command -v aerospace &>/dev/null; then
+  aerospace reload-config
+fi

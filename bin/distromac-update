@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/.distromac}"
+
+echo "Updating distromac..."
+
+# Pull latest
+cd "$DISTROMAC_PATH"
+git pull --rebase
+
+# Run pending migrations
+distromac-migrate
+
+# Re-apply current theme (regenerates templates with potentially new templates)
+current_theme=$(distromac-theme-current 2>/dev/null || echo "")
+if [[ -n $current_theme ]] && [[ $current_theme != "No theme set" ]]; then
+  echo "Re-applying theme: $current_theme"
+  distromac-theme-set "$current_theme"
+fi
+
+# Run hook
+distromac-hook post-update || true
+
+echo "distromac updated to $(distromac-version)"

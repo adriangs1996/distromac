@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+screencapture -i ~/Desktop/code_screenshot.png && echo -n ~/Desktop/code_screenshot.png | pbcopy

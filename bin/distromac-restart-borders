@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+if pgrep -x borders &>/dev/null; then
+  brew services restart borders
+fi

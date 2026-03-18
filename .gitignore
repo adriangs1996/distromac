@@ -1,0 +1,12 @@
+.worktrees/
+.DS_Store
+*.swp
+*.swo
+*~
+*.bak
+*.backup
+*.orig
+.env
+.env.local
+node_modules/
+config/tmux/plugins/

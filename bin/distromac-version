@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/.distromac}"
+cat "$DISTROMAC_PATH/version"

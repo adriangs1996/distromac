@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+# ──────────────────────────────────────────────────────────────────────────────
+# SketchyBar - Waybar-inspired configuration
+# ──────────────────────────────────────────────────────────────────────────────
+
+# distromac theme integration
+source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
+
+source "$CONFIG_DIR/scripts/app-font-sh.sh"
+
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+EVENTS_DIR="$CONFIG_DIR/events"
+ITEMS_DIR="$CONFIG_DIR/items"
+. "$PLUGIN_DIR/globals.sh"
+
+sketchybar --hotload on
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Bar configuration
+# ──────────────────────────────────────────────────────────────────────────────
+barconf=(
+  position=top
+  height=55
+  blur_radius=30
+  # display=main
+  y_offset=3
+  margin=10
+  notch_offset=45
+  font_smoothing=on
+  padding_left=10
+  # padding_right=5
+  border_width=3
+  border_color="${_SSDF_CM_MANTLE_LIGHTER}"
+  corner_radius=20
+  color="${_SSDF_CM_MANTLE}"
+  sticky="on"
+)
+
+sketchybar --bar "${barconf[@]}"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Default item styling
+# ──────────────────────────────────────────────────────────────────────────────
+default=(
+  padding_left=2
+  padding_right=2
+  icon.font="JetBrainsMono Nerd Font:Bold:22.0"
+  label.font="JetBrainsMono Nerd Font:Bold:12.0"
+  icon.color="${_SSDF_CM_SUBTEXT_1}"
+  label.color="${_SSDF_CM_SUBTEXT_1}"
+  icon.padding_left=4
+  icon.padding_right=4
+  label.padding_left=4
+  label.padding_right=4
+)
+
+sketchybar --default "${default[@]}"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# LEFT SIDE - Logo + System Info
+# ──────────────────────────────────────────────────────────────────────────────
+source "$ITEMS_DIR/logo.sh"
+source "$ITEMS_DIR/cpu.sh"
+source "$ITEMS_DIR/mem.sh"
+
+# Left bracket styling
+sketchybar --add bracket left_island logo separator cpu mem disk \
+  --set left_island \
+  background.corner_radius=20 \
+  background.color="${_SSDF_CM_MANTLE_LIGHTER}" \
+  background.height=32 \
+  background.drawing=on
+
+# Spacer between left_island and notifications
+sketchybar --add item spacer_left left \
+  --set spacer_left \
+  width=25 \
+  background.drawing=off \
+  icon.drawing=off \
+  label.drawing=off
+
+# ──────────────────────────────────────────────────────────────────────────────
+# LEFT SIDE - Open PRs
+# ──────────────────────────────────────────────────────────────────────────────
+source "$ITEMS_DIR/open_prs.sh"
+
+sketchybar --add bracket notif_island notif.prs \
+  --set notif_island \
+  background.corner_radius=20 \
+  background.color="${_SSDF_CM_MANTLE_LIGHTER}" \
+  background.height=32 \
+  background.drawing=on
+
+# ──────────────────────────────────────────────────────────────────────────────
+# CENTER - Workspace + Tmux (Segmented Bar)
+# ──────────────────────────────────────────────────────────────────────────────
+source "$ITEMS_DIR/workspace.sh"
+source "$ITEMS_DIR/tmux.sh"
+
+sketchybar --add bracket center_island ws_number tmux_sessions tmux_window \
+  --set center_island \
+  background.corner_radius=20 \
+  background.color="${_SSDF_CM_MANTLE_LIGHTER}" \
+  background.height=32 \
+  background.drawing=on
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SPOTIFY
+# ──────────────────────────────────────────────────────────────────────────────
+
+source "$ITEMS_DIR/spotify.sh"
+
+sketchybar --add bracket spotify_island spotify.track spotify.next spotify.play spotify.prev \
+  --set spotify_island \
+  background.corner_radius=20 \
+  background.color="${_SSDF_CM_MANTLE_LIGHTER}" \
+  background.height=32 \
+  background.drawing=on
+
+sketchybar --update

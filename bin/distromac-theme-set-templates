@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/.distromac}"
+CURRENT_DIR="$HOME/.config/distromac/current"
+THEME_DIR="$CURRENT_DIR/next-theme"
+COLORS_FILE="$THEME_DIR/colors.toml"
+
+if [[ ! -f $COLORS_FILE ]]; then
+  echo "Error: No colors.toml found in $THEME_DIR" >&2
+  exit 1
+fi
+
+# Build sed script from colors.toml
+sed_script=""
+while IFS='=' read -r key value; do
+  # Skip comments and empty lines
+  [[ $key =~ ^[[:space:]]*# ]] && continue
+  [[ -z $key ]] && continue
+
+  # Trim whitespace and quotes (do NOT strip # — it's part of hex color values)
+  key=$(echo "$key" | xargs)
+  value=$(echo "$value" | xargs | sed 's/^"//;s/"$//' | xargs)
+
+  [[ -z $value ]] && continue
+
+  # Full value: {{ key }}
+  sed_script+="s|{{ ${key} }}|${value}|g;"
+
+  # Strip #: {{ key_strip }}
+  stripped="${value#\#}"
+  sed_script+="s|{{ ${key}_strip }}|${stripped}|g;"
+
+  # RGB decimal: {{ key_rgb }} (only for hex colors)
+  if [[ $value =~ ^# ]]; then
+    r=$((16#${stripped:0:2}))
+    g=$((16#${stripped:2:2}))
+    b=$((16#${stripped:4:2}))
+    sed_script+="s|{{ ${key}_rgb }}|${r},${g},${b}|g;"
+  fi
+done < "$COLORS_FILE"
+
+# Process templates: user overrides first, then built-in
+process_templates() {
+  local tpl_dir="$1"
+
+  [[ ! -d $tpl_dir ]] && return
+
+  for tpl in "$tpl_dir"/*.tpl; do
+    [[ ! -f $tpl ]] && continue
+
+    local filename
+    filename=$(basename "$tpl" .tpl)
+
+    # Skip if theme already provides this file (not a template)
+    if [[ -f "$THEME_DIR/$filename" ]]; then
+      continue
+    fi
+
+    sed "$sed_script" "$tpl" > "$THEME_DIR/$filename"
+  done
+}
+
+# User templates override built-in
+process_templates "$HOME/.config/distromac/themed"
+process_templates "$DISTROMAC_PATH/default/themed"

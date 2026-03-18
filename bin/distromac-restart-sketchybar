@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+if pgrep -x sketchybar &>/dev/null; then
+  brew services restart sketchybar
+fi

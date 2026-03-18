@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/.distromac}"
+
+echo "Applying macOS defaults..."
+
+for script in "$DISTROMAC_PATH/default/macos"/*.sh; do
+  [[ ! -f $script ]] && continue
+  echo "  → $(basename "$script" .sh)"
+  bash "$script"
+done
+
+echo "Done. Some changes may require a logout/restart to take effect."

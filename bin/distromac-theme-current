@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+theme_file="$HOME/.config/distromac/current/theme.name"
+
+if [[ -f $theme_file ]]; then
+  cat "$theme_file"
+else
+  echo "No theme set"
+  exit 1
+fi

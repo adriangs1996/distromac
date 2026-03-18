@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+# Install cask(s) if not already installed.
+# Usage: distromac-cask-install app1 app2 ...
+
+for cask in "$@"; do
+  if ! brew list --cask "$cask" &>/dev/null; then
+    echo "Installing $cask..."
+    brew install --cask "$cask"
+  fi
+done

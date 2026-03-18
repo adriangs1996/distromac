@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+# Run a user hook if it exists.
+# Usage: distromac-hook <event> [args...]
+# Hooks live in ~/.config/distromac/hooks/
+
+event="${1:?Usage: distromac-hook <event> [args...]}"
+shift
+
+hook_path="$HOME/.config/distromac/hooks/$event"
+
+if [[ -x $hook_path ]]; then
+  exec "$hook_path" "$@"
+fi

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+# Returns 0 (true) if ANY of the given casks are missing.
+# Usage: distromac-cask-missing app1 app2 ...
+
+for cask in "$@"; do
+  if ! brew list --cask "$cask" &>/dev/null; then
+    exit 0 # Found missing
+  fi
+done
+exit 1 # All present

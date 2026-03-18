@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/.distromac}"
+
+{
+  for dir in "$DISTROMAC_PATH/themes"/*/; do
+    [[ -d $dir ]] && basename "$dir" || true
+  done
+
+  for dir in "$HOME/.config/distromac/themes"/*/; do
+    [[ -d $dir ]] && basename "$dir" || true
+  done
+} | sort -u

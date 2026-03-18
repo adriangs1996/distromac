@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/.distromac}"
+STATE_DIR="$HOME/.local/state/distromac/migrations"
+SKIP_DIR="$STATE_DIR/skipped"
+
+mkdir -p "$STATE_DIR" "$SKIP_DIR"
+
+for migration in "$DISTROMAC_PATH/migrations"/*.sh; do
+  [[ ! -f $migration ]] && continue
+
+  name=$(basename "$migration")
+
+  # Skip if already run or skipped
+  [[ -f "$STATE_DIR/$name" ]] && continue
+  [[ -f "$SKIP_DIR/$name" ]] && continue
+
+  echo "Running migration: $name"
+  if bash "$migration"; then
+    touch "$STATE_DIR/$name"
+    echo "  ✓ Done"
+  else
+    echo "  ✗ Migration failed: $name"
+    read -rp "  Skip this migration? [y/N] " answer
+    if [[ $answer == [yY] ]]; then
+      touch "$SKIP_DIR/$name"
+      echo "  Skipped."
+    else
+      echo "  Aborting."
+      exit 1
+    fi
+  fi
+done

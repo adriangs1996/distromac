@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/.distromac}"
+
+# Reset a config file to its default.
+# Usage: distromac-refresh-config <relative-path>
+# Example: distromac-refresh-config ghostty/config
+
+config_path="${1:?Usage: distromac-refresh-config <relative-path>}"
+source_file="$DISTROMAC_PATH/config/$config_path"
+target_file="$HOME/.config/$config_path"
+
+if [[ ! -f $source_file ]]; then
+  echo "Error: No default config found at $source_file" >&2
+  exit 1
+fi
+
+# Backup existing
+if [[ -f $target_file ]]; then
+  backup="${target_file}.distromac-backup.$(date +%s)"
+  cp "$target_file" "$backup"
+  echo "Backed up to: $backup"
+fi
+
+# Copy default
+mkdir -p "$(dirname "$target_file")"
+cp "$source_file" "$target_file"
+
+echo "Refreshed: $config_path"

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+# Returns 0 (true) if ANY of the given brew packages are missing.
+# Usage: distromac-brew-missing pkg1 pkg2 ...
+# For use in: if distromac-brew-missing bat; then ...
+
+for pkg in "$@"; do
+  if ! brew list --formula "$pkg" &>/dev/null; then
+    exit 0 # Found missing
+  fi
+done
+exit 1 # All present

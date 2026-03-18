@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+# Install brew formula(s) if not already installed.
+# Usage: distromac-brew-install pkg1 pkg2 ...
+
+for pkg in "$@"; do
+  if ! brew list --formula "$pkg" &>/dev/null; then
+    echo "Installing $pkg..."
+    brew install "$pkg"
+  fi
+done
