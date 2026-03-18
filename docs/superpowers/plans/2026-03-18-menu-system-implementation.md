@@ -184,10 +184,6 @@ Replace `show_style_menu()  { show_main_menu; }` with:
 ```bash
 show_style_menu() {
   case $(menu "Style" "󰸌  Theme\n  Current Theme\n  Refresh Theme") in
-    *Theme*pick*|*"󰸌  Theme"*)
-      distromac-theme-pick
-      exit 0
-      ;;
     *Current*)
       run_and_wait distromac-theme-current
       ;;
@@ -202,6 +198,10 @@ show_style_menu() {
         echo "Press any key to close..."
         read -rsn1
       fi
+      ;;
+    *Theme*)
+      distromac-theme-pick
+      exit 0
       ;;
     *) back_to ;;
   esac
@@ -244,16 +244,15 @@ show_setup_menu() {
 }
 
 show_refresh_config_menu() {
-  local configs="  aerospace/aerospace.toml"
-  configs="$configs\n  ghostty/config"
-  configs="$configs\n  tmux/tmux.conf"
-  configs="$configs\n  starship/starship.toml"
-  configs="$configs\n  nvim"
-  configs="$configs\n  sketchybar"
-  configs="$configs\n  borders/bordersrc"
-  configs="$configs\n  lsd/colors.yaml"
-  configs="$configs\n  bat/config"
-  configs="$configs\n  zsh/.zshrc"
+  # Only list individual files that distromac-refresh-config can handle
+  local configs="aerospace/aerospace.toml"
+  configs="$configs\nghostty/config"
+  configs="$configs\ntmux/tmux.conf"
+  configs="$configs\nstarship/starship.toml"
+  configs="$configs\nborders/bordersrc"
+  configs="$configs\nlsd/colors.yaml"
+  configs="$configs\nbat/config"
+  configs="$configs\nzsh/.zshrc"
 
   local selected
   selected=$(menu "Refresh Config" "$configs")
@@ -261,10 +260,7 @@ show_refresh_config_menu() {
   case $selected in
     "") back_to show_setup_menu ;;
     *)
-      # Extract path after the icon
-      local config_path
-      config_path=$(echo "$selected" | sed 's/^.*  //')
-      run_and_wait distromac-refresh-config "$config_path"
+      run_and_wait distromac-refresh-config "$selected"
       ;;
   esac
 }
