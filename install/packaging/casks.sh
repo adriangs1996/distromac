@@ -9,5 +9,6 @@ distromac-cask-install google-chrome
 [[ ${DISTROMAC_NO_GHOSTTY} != "1" ]]  && distromac-cask-install ghostty
 [[ ${DISTROMAC_NO_RAYCAST} != "1" ]]  && distromac-cask-install raycast
 [[ ${DISTROMAC_NO_SPOTIFY} != "1" ]]  && distromac-cask-install spotify
+[[ ${DISTROMAC_NO_ORBSTACK} != "1" ]] && distromac-cask-install orbstack
 
 log_success "GUI apps installed"
