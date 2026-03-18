@@ -12,28 +12,31 @@ An interactive menu system for distromac, inspired by omarchy's `omarchy-menu`. 
 Three components work together:
 
 1. **`bin/distromac-menu`** — Monolithic bash script containing all menu logic, submenus, helpers, and action execution.
-2. **Aerospace keybinding** — `ctrl-t` launches Ghostty with a custom class targeting the menu script.
-3. **Aerospace window rule** — Detects the menu window and forces floating layout.
+2. **Aerospace keybinding** — `ctrl-t` launches Ghostty targeting the menu script.
+3. **Aerospace window rule** — Detects the menu window by title and forces floating layout.
 
 ### Trigger Flow
 
 ```
-ctrl-t (Aerospace) → ghostty --class=distromac-menu -e distromac-menu
-                   → Aerospace detects window title → layout floating
+ctrl-t (Aerospace) → ghostty -e distromac-menu
+                   → distromac-menu sets terminal title via escape sequence
+                   → Aerospace detects window title "distromac-menu" → layout floating
                    → fzf renders menu → user selects → action runs
                    → "Press any key to close..." → window closes
 ```
 
+Note: Ghostty's `--class` flag is a Linux/X11/Wayland concept and does not work on macOS. Instead, the script sets the terminal title with `printf '\033]0;distromac-menu\007'` at startup, which Aerospace matches via `window-title-regex-substring`.
+
 ### Toggle Behavior
 
-If `distromac-menu` is already running when `ctrl-t` is pressed again, the existing instance closes instead of opening a second one. Detected via `pgrep`.
+If `distromac-menu` is already running when `ctrl-t` is pressed again, the existing instance closes instead of opening a second one. Detected via a PID file at `/tmp/distromac-menu.pid`.
 
 ## Aerospace Configuration Changes
 
 ### New keybinding
 
 ```toml
-ctrl-t = 'exec-and-forget ghostty --class=distromac-menu -e distromac-menu'
+ctrl-t = 'exec-and-forget ghostty -e distromac-menu'
 ```
 
 ### New window detection rule
@@ -54,7 +57,7 @@ The Raycast theme picker script (`config/raycast/scripts/distromac-theme-pick.sh
 ```
 Main Menu
 ├── 󰸌  Style
-│   ├── 󰸌  Theme          → fzf theme picker with color preview
+│   ├── 󰸌  Theme          → calls distromac-theme-pick (reuses existing fzf preview)
 │   ├──   Current Theme   → displays active theme name
 │   └──   Refresh Theme   → re-applies current theme
 │
@@ -81,6 +84,32 @@ Main Menu
 - **Escape / empty selection** in main menu → closes the window
 - **ctrl-t again** → toggle closes the menu if already open
 
+## Startup
+
+At the top of `distromac-menu`, before any menu logic:
+
+1. **Set terminal title** for Aerospace detection:
+   ```bash
+   printf '\033]0;distromac-menu\007'
+   ```
+
+2. **Check fzf dependency:**
+   ```bash
+   if ! command -v fzf &>/dev/null; then
+     echo "Error: fzf is required. Run: brew install fzf" >&2
+     read -rsn1
+     exit 1
+   fi
+   ```
+
+3. **Toggle detection** — close existing instance if running (see Toggle Detection section).
+
+4. **Load theme colors** from `~/.config/distromac/current/theme/colors.toml`.
+
+## Window Sizing
+
+The Ghostty invocation does not specify window dimensions — the floating window uses Ghostty's default size. This is acceptable since Aerospace allows the user to resize floating windows. A future improvement could pass `--window-height` and `--window-width` flags if Ghostty adds stable CLI support for them.
+
 ## Core Helpers
 
 ### `menu()` — fzf wrapper
@@ -98,7 +127,7 @@ menu() {
 }
 ```
 
-Colors are loaded dynamically from `~/.config/distromac/current/colors.toml` at menu startup, so fzf matches the active theme.
+Colors are loaded dynamically from `~/.config/distromac/current/theme/colors.toml` at menu startup, so fzf matches the active theme.
 
 ### `run_and_wait()` — action executor
 
@@ -107,7 +136,7 @@ Runs a command, displays its output, and waits for user acknowledgment before cl
 ```bash
 run_and_wait() {
   echo ""
-  eval "$@"
+  "$@"
   echo ""
   echo "Press any key to close..."
   read -rsn1
@@ -135,7 +164,7 @@ back_to() {
 
 ## Theme-Aware fzf Colors
 
-At startup, `distromac-menu` reads `~/.config/distromac/current/colors.toml` and extracts hex values for:
+At startup, `distromac-menu` reads `~/.config/distromac/current/theme/colors.toml` and extracts hex values for:
 
 - `foreground` → fzf `fg`
 - `background` → fzf `bg`
@@ -146,12 +175,18 @@ This ensures the menu visually matches the active distromac theme.
 
 ## Toggle Detection
 
+Uses a PID file for reliable instance detection, avoiding false positives from `pgrep`.
+
 ```bash
 toggle_existing_menu() {
-  if pgrep -f "distromac-menu" | grep -v $$ >/dev/null 2>&1; then
-    pkill -f "distromac-menu"
+  local pidfile="/tmp/distromac-menu.pid"
+  if [[ -f $pidfile ]] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+    kill "$(cat "$pidfile")"
+    rm -f "$pidfile"
     exit 0
   fi
+  echo $$ > "$pidfile"
+  trap 'rm -f "$pidfile"' EXIT
 }
 ```
 
@@ -166,8 +201,8 @@ Users can add custom menu items by creating `~/.config/distromac/extensions/menu
 | Action | Command |
 |--------|---------|
 | Lock Screen | `pmset displaysleepnow` |
-| Restart | `sudo shutdown -r now` |
-| Shutdown | `sudo shutdown -h now` |
+| Restart | `osascript -e 'tell app "System Events" to restart'` |
+| Shutdown | `osascript -e 'tell app "System Events" to shut down'` |
 | Restart Sketchybar | `distromac-restart-sketchybar` |
 | Restart Borders | `distromac-restart-borders` |
 | Restart Aerospace | `distromac-restart-aerospace` |
