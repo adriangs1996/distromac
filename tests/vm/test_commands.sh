@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 # Sourced by suite.sh — do not execute directly.
-# Relies on _flag_passed / _app_skipped helpers from test_install.sh (sourced first).
+
+# Define helpers if not already available (e.g., when running SUITE=commands alone)
+if ! declare -f _flag_passed &>/dev/null; then
+  _flag_passed() {
+    [[ " ${DISTROMAC_TEST_FLAGS:-} " == *" $1 "* ]]
+  }
+  _app_skipped() {
+    _flag_passed "--no-$1" || _flag_passed "--minimal"
+  }
+fi
 
 # --- distromac-version ---
 assert_exit_0 "version exits 0" distromac-version
