@@ -58,19 +58,21 @@ TART_PID=$!
 echo "[VM] Waiting for SSH availability..."
 deadline=$((SECONDS + 120))
 vm_ip=""
+ssh_ready=false
 
 while (( SECONDS < deadline )); do
   vm_ip=$(tart ip "$VM_NAME" 2>/dev/null || true)
   if [[ -n $vm_ip ]]; then
     if sshpass -p "$SSH_PASS" ssh "${SSH_OPTS[@]}" "$SSH_USER@$vm_ip" true 2>/dev/null; then
       echo "[VM] SSH ready at $vm_ip"
+      ssh_ready=true
       break
     fi
   fi
   sleep 5
 done
 
-if [[ -z $vm_ip ]] || ! vm_ssh true 2>/dev/null; then
+if [[ $ssh_ready != true ]]; then
   echo "[ERROR] SSH timeout after 120s. VM may still be booting." >&2
   exit 2
 fi
