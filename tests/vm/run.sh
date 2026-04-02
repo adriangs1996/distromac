@@ -79,8 +79,8 @@ fi
 
 # --- 4. Sync repo into VM ---
 echo "[VM] Syncing repo into VM..."
-sshpass -p "$SSH_PASS" rsync -az --exclude .git --exclude .claude --exclude .worktrees \
-  -e "ssh ${SSH_OPTS[*]}" \
+rsync -az --exclude .git --exclude .claude --exclude .worktrees \
+  -e "sshpass -p $SSH_PASS ssh ${SSH_OPTS[*]}" \
   "$REPO_ROOT/" "$SSH_USER@$vm_ip:~/distromac/"
 
 # --- 5. Run test suite (30-min timeout) ---
