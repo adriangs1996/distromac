@@ -26,6 +26,12 @@ else
   _fail "install.sh exits 0" "exit 0" "exit $install_rc"
 fi
 
+# Refresh PATH — install.sh installs homebrew but its PATH changes
+# don't propagate back to our shell
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 # --- Phase 2: Core binaries ---
 for bin in bat lsd starship fzf rg fd jq git gh; do
   assert_exit_0 "$bin is available" command -v "$bin"

@@ -3,6 +3,13 @@ set -eEo pipefail
 
 DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/distromac}"
 export DISTROMAC_PATH
+
+# Ensure brew-installed tools are in PATH (homebrew may not be in
+# default PATH on a fresh VM until shell profile is reloaded)
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 export PATH="$DISTROMAC_PATH/bin:$PATH"
 
 # Source assertion library
@@ -23,6 +30,12 @@ for suite in "${SUITES[@]}"; do
   echo ""
   echo "[SUITE] $suite"
   source "$DISTROMAC_PATH/tests/vm/test_${suite}.sh"
+
+  # After install suite, refresh PATH so brew-installed tools are found
+  if [[ $suite == "install" && -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    export PATH="$DISTROMAC_PATH/bin:$PATH"
+  fi
 done
 
 # Summary
