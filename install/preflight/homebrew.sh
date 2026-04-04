@@ -12,3 +12,11 @@ else
   eval "$(/opt/homebrew/bin/brew shellenv)"
   log_success "Installed"
 fi
+
+# Ensure brewed curl + CA certs are available for cask downloads.
+# Fresh macOS installs (and VMs) may have outdated system CA certs
+# causing SSL failures when downloading casks.
+if ! brew list --formula curl &>/dev/null; then
+  brew install curl >/dev/null 2>&1 || true
+fi
+export HOMEBREW_FORCE_BREWED_CURL=1
