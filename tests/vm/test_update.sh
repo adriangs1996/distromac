@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 # Sourced by suite.sh — do not execute directly.
+# Bash 3.2 compatible — no associative arrays.
 
 CURRENT_THEME=$(distromac-theme-current)
 THEME_OUT="$HOME/.config/distromac/current/theme"
 
-# 1. Record initial checksums of deployed configs
-declare -A cksum_orig
+# 1. Record initial checksums of deployed configs (temp file instead of assoc array)
+_CKSUM_FILE=$(mktemp)
 
 _record_checksum() {
   local label="$1" path="$2"
   if [[ -f $path ]]; then
-    cksum_orig[$label]=$(md5 -q "$path")
+    echo "${label}=$(md5 -q "$path")" >> "$_CKSUM_FILE"
   fi
+}
+
+_get_checksum() {
+  grep "^${1}=" "$_CKSUM_FILE" | head -1 | cut -d= -f2-
 }
 
 _record_checksum "bat" "$HOME/.config/bat/config"
@@ -30,9 +35,10 @@ echo "# test-modification" >> "$DISTROMAC_PATH/default/themed/bat.tpl"
 assert_exit_0 "re-apply after template change" distromac-theme-set "$CURRENT_THEME"
 
 # 4. Verify bat config changed
-if [[ -n ${cksum_orig[bat]:-} ]]; then
+orig_bat=$(_get_checksum "bat")
+if [[ -n $orig_bat ]]; then
   new_cksum=$(md5 -q "$HOME/.config/bat/config")
-  if [[ ${cksum_orig[bat]} != "$new_cksum" ]]; then
+  if [[ $orig_bat != "$new_cksum" ]]; then
     _pass "bat config changed after template edit"
   else
     _fail "bat config changed after template edit" "checksum to differ" "checksums match"
@@ -49,8 +55,9 @@ for label in lsd ghostty tmux borders sketchybar zsh; do
     sketchybar) path="$THEME_OUT/sketchybar-theme.sh" ;;
     zsh)       path="$THEME_OUT/zsh-theme.zsh" ;;
   esac
-  if [[ -n ${cksum_orig[$label]:-} && -f $path ]]; then
-    assert_eq "$label config unchanged" "${cksum_orig[$label]}" "$(md5 -q "$path")"
+  orig=$(_get_checksum "$label")
+  if [[ -n $orig && -f $path ]]; then
+    assert_eq "$label config unchanged" "$orig" "$(md5 -q "$path")"
   fi
 done
 
@@ -63,8 +70,10 @@ assert_exit_0 "re-apply after template revert" distromac-theme-set "$CURRENT_THE
 # 8. Verify all checksums match originals (clean round-trip)
 _verify_restored() {
   local label="$1" path="$2"
-  if [[ -n ${cksum_orig[$label]:-} && -f $path ]]; then
-    assert_eq "$label config restored" "${cksum_orig[$label]}" "$(md5 -q "$path")"
+  local orig
+  orig=$(_get_checksum "$label")
+  if [[ -n $orig && -f $path ]]; then
+    assert_eq "$label config restored" "$orig" "$(md5 -q "$path")"
   fi
 }
 
@@ -76,3 +85,5 @@ _verify_restored "tmux" "$THEME_OUT/tmux-theme.conf"
 _verify_restored "borders" "$THEME_OUT/borders"
 _verify_restored "sketchybar" "$THEME_OUT/sketchybar-theme.sh"
 _verify_restored "zsh" "$THEME_OUT/zsh-theme.zsh"
+
+rm -f "$_CKSUM_FILE"

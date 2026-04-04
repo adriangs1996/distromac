@@ -1,27 +1,36 @@
 #!/usr/bin/env bash
 # Sourced by suite.sh — do not execute directly.
+# Bash 3.2 compatible — no associative arrays or mapfile.
 
 CURRENT_DIR="$HOME/.config/distromac/current"
 THEME_OUT="$CURRENT_DIR/theme"
 
-# --- Helpers ---
+# --- Helpers (bash 3 compatible) ---
 
-# Parse colors.toml into associative array COLORS
-# Also computes _strip variants
-declare -A COLORS
+# Temp file for parsed colors (key=value per line)
+_COLORS_FILE=$(mktemp)
+trap "rm -f '$_COLORS_FILE'" EXIT
+
+# Parse colors.toml into temp file
 parse_colors_toml() {
   local file="$1"
-  COLORS=()
+  : > "$_COLORS_FILE"
   while IFS='=' read -r key value; do
     [[ $key =~ ^[[:space:]]*# ]] && continue
     [[ -z $key ]] && continue
     key=$(echo "$key" | xargs)
     value=$(echo "$value" | xargs | sed 's/^"//;s/"$//' | xargs)
     [[ -z $value ]] && continue
-    COLORS[$key]="$value"
+    echo "${key}=${value}" >> "$_COLORS_FILE"
     # Strip leading # for _strip variant
-    COLORS[${key}_strip]="${value#\#}"
+    echo "${key}_strip=${value#\#}" >> "$_COLORS_FILE"
   done < "$file"
+}
+
+# Look up a color value by key
+_color_get() {
+  local key="$1"
+  grep "^${key}=" "$_COLORS_FILE" | head -1 | cut -d= -f2-
 }
 
 # Convert hex to decimal R,G,B
@@ -33,7 +42,8 @@ hex_to_rgb() {
 # Assert a color key's value appears in a file
 assert_color() {
   local theme="$1" color_key="$2" file="$3"
-  local value="${COLORS[$color_key]:-}"
+  local value
+  value=$(_color_get "$color_key")
   if [[ -z $value ]]; then
     _fail "[$theme] $color_key in $(basename "$file")" "key '$color_key' to exist in COLORS" "key not found"
     return
@@ -128,7 +138,7 @@ while IFS= read -r theme; do
     done
     # _rgb variants
     for key in blue cyan yellow green red magenta green1; do
-      local_hex="${COLORS[$key]:-}"
+      local_hex=$(_color_get "$key")
       if [[ -n $local_hex && $local_hex =~ ^# ]]; then
         local_rgb=$(hex_to_rgb "$local_hex")
         assert_contains "[$theme] ${key}_rgb in zsh-theme.zsh" "$local_rgb" "$THEME_OUT/zsh-theme.zsh"
@@ -172,18 +182,22 @@ while IFS= read -r theme; do
 done < <(distromac-theme-list)
 
 # --- Round-trip test ---
-mapfile -t all_themes < <(distromac-theme-list)
+all_themes=()
+while IFS= read -r t; do
+  all_themes+=("$t")
+done < <(distromac-theme-list)
+
 first_theme="${all_themes[0]}"
 last_theme="${all_themes[${#all_themes[@]}-1]}"
 
 # Set first theme and snapshot checksums
 distromac-theme-set "$first_theme" >/dev/null 2>&1
 
-declare -A snapshot
+_SNAPSHOT_FILE=$(mktemp)
 for f in "$THEME_OUT"/*; do
   [[ ! -f $f ]] && continue
   fname=$(basename "$f")
-  snapshot[$fname]=$(md5 -q "$f")
+  echo "${fname}=$(md5 -q "$f")" >> "$_SNAPSHOT_FILE"
 done
 
 # Set last theme, then back to first
@@ -195,5 +209,8 @@ for f in "$THEME_OUT"/*; do
   [[ ! -f $f ]] && continue
   fname=$(basename "$f")
   current_sum=$(md5 -q "$f")
-  assert_eq "[round-trip] $fname unchanged" "${snapshot[$fname]:-MISSING}" "$current_sum"
+  orig_sum=$(grep "^${fname}=" "$_SNAPSHOT_FILE" | head -1 | cut -d= -f2-)
+  assert_eq "[round-trip] $fname unchanged" "${orig_sum:-MISSING}" "$current_sum"
 done
+
+rm -f "$_SNAPSHOT_FILE"

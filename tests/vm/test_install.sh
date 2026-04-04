@@ -16,7 +16,15 @@ if [[ -n ${DISTROMAC_TEST_FLAGS:-} ]]; then
   read -ra install_flags <<< "$DISTROMAC_TEST_FLAGS"
 fi
 
-assert_exit_0 "install.sh exits 0" bash "$DISTROMAC_PATH/install.sh" "${install_flags[@]}"
+# Run install with visible output so failures can be diagnosed
+install_rc=0
+bash "$DISTROMAC_PATH/install.sh" "${install_flags[@]}" 2>&1 || install_rc=$?
+
+if (( install_rc == 0 )); then
+  _pass "install.sh exits 0"
+else
+  _fail "install.sh exits 0" "exit 0" "exit $install_rc"
+fi
 
 # --- Phase 2: Core binaries ---
 for bin in bat lsd starship fzf rg fd jq git gh; do
