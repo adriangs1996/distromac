@@ -7,6 +7,8 @@ set -eEo pipefail
 for cask in "$@"; do
   if ! brew list --cask "$cask" &>/dev/null; then
     echo "Installing $cask..."
-    brew install --cask "$cask"
+    if ! brew install --cask "$cask"; then
+      echo "[WARN] Failed to install cask: $cask (continuing)" >&2
+    fi
   fi
 done
