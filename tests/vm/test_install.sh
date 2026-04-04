@@ -39,7 +39,7 @@ done
 
 # --- Phase 3: Optional binaries (gated by flags) ---
 # CLI tools
-for app in nvim tmux sketchybar borders aerospace; do
+for app in nvim tmux sketchybar borders; do
   if ! _app_skipped "$app"; then
     assert_exit_0 "$app is available" command -v "$app"
   fi
@@ -54,6 +54,9 @@ if ! _app_skipped "raycast"; then
 fi
 if ! _app_skipped "spotify"; then
   assert_dir_exists "Spotify.app installed" "/Applications/Spotify.app"
+fi
+if ! _app_skipped "aerospace"; then
+  assert_dir_exists "AeroSpace.app installed" "/Applications/AeroSpace.app"
 fi
 
 # --- Phase 4: Config directories ---
