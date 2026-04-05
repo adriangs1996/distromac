@@ -8,6 +8,7 @@ local dp = {
   red = "#E46876",
   pink = "#FF80BF",
   pink2 = "#FF82AF",
+  -- pink3 = "#F872DE",
   pink3 = "#ff8cc6",
   yellow = "#FFFF80",
   orange = "#FFCA80",
@@ -30,10 +31,14 @@ return {
       transparent_background = true,
       color_overrides = {
         mocha = {
+          -- red = "#eb6f92",
           pink = tkm_palette.purple,
           dpink = tkm_palette.purple,
           green1 = "#4fd6be",
           mauve = tkn_palette.purple,
+          blue = tkn_palette.blue,
+          green = tkm_palette.green,
+          red = tkm_palette.red,
         },
         macchiato = {
           pink = tk_pink,
@@ -58,11 +63,12 @@ return {
           return {
 
             Constant = { fg = colors.peach }, -- (preferred) any constant
+
             PreProc = { fg = colors.red },
+            ["@lsp.mod.global"] = { fg = colors.red },
+            ["@tag.tsx"] = { fg = colors.red },
 
             ["@module"] = { fg = colors.sapphire },
-            ["@lsp.type.namespace"] = { fg = colors.sapphire, style = {} },
-            ["@tag.tsx"] = { fg = colors.yellow },
             Type = { fg = colors.yellow }, -- (preferred) int, long, char, etcp.
             TSField = { fg = colors.yellow }, -- For fields.
             TSType = { fg = colors.yellow }, -- For types.
@@ -70,25 +76,27 @@ return {
             TSTypeBuiltin = { fg = colors.yellow }, -- For builtin types.
             ["@type.builtin"] = { fg = colors.yellow }, -- For builtin types.
 
-            ["@lsp.type.enumMember"] = { fg = colors.sky },
-            ["@lsp.type.interface"] = { fg = colors.maroon },
+            ["@lsp.type.enumMember"] = { fg = colors.red },
+            ["@lsp.type.namespace"] = { fg = colors.red, style = {} },
+
+            ["@lsp.type.interface"] = { fg = colors.sapphire },
 
             ["@parameter"] = { fg = colors.peach }, -- For parameters of a function.
             ["@variable.parameter"] = { fg = colors.peach }, -- For parameters of a function.
 
-            Conditional = { fg = colors.pink, style = {} },
-            Repeat = { fg = colors.pink },
-            Exception = { fg = colors.pink },
-            ["@keyword.return"] = { fg = colors.pink },
-            ["@lsp.mod.controlFlow"] = { fg = colors.pink },
+            Conditional = { fg = colors.pink, style = {} }, --  if, then, else, endif, switch, etcp.
+            Repeat = { fg = colors.pink }, --   for, do, while, etcp.
+            Exception = { fg = colors.pink }, --   for, do, while, etcp.
+            ["@keyword.return"] = { fg = colors.pink }, --   for, do, while, etcp.
+            ["@lsp.mod.controlFlow"] = { fg = colors.pink }, --   for, do, while, etcp.
 
             ["@variable.member.ruby"] = { fg = colors.red },
 
-            ["@field"] = { fg = colors.green1 },
-            TSProperty = { fg = colors.green1 },
-            ["@property"] = { fg = colors.green1 },
+            ["@field"] = { fg = colors.green1 }, -- For fields.
+            ["@tag.attribute"] = { fg = colors.green1 }, -- For fields.
+            TSProperty = { fg = colors.green1 }, -- Same as TSField.
+            ["@property"] = { fg = colors.green1 }, -- Same as TSField.
             ["@string.special.symbol.ruby"] = { fg = colors.peach },
-            ["@tag.attribute"] = { fg = colors.lavender },
 
             ["@lsp.type.fieldName"] = { fg = colors.yellow },
           }
@@ -124,6 +132,7 @@ return {
             information = { "undercurl" },
           },
         },
+        -- navic = { enabled = true, custom_bg = "lualine" },
         neotest = true,
         neotree = true,
         noice = true,
