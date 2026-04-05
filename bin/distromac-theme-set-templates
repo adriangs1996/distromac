@@ -11,8 +11,10 @@ if [[ ! -f $COLORS_FILE ]]; then
   exit 1
 fi
 
-# Build sed script from colors.toml
-sed_script=""
+# Build sed script file from colors.toml
+sed_file=$(mktemp)
+trap "rm -f '$sed_file'" EXIT
+
 while IFS='=' read -r key value; do
   # Skip comments and empty lines
   [[ $key =~ ^[[:space:]]*# ]] && continue
@@ -25,18 +27,18 @@ while IFS='=' read -r key value; do
   [[ -z $value ]] && continue
 
   # Full value: {{ key }}
-  sed_script+="s|{{ ${key} }}|${value}|g;"
+  echo "s|{{ ${key} }}|${value}|g" >> "$sed_file"
 
   # Strip #: {{ key_strip }}
   stripped="${value#\#}"
-  sed_script+="s|{{ ${key}_strip }}|${stripped}|g;"
+  echo "s|{{ ${key}_strip }}|${stripped}|g" >> "$sed_file"
 
   # RGB decimal: {{ key_rgb }} (only for hex colors)
   if [[ $value =~ ^# ]]; then
     r=$((16#${stripped:0:2}))
     g=$((16#${stripped:2:2}))
     b=$((16#${stripped:4:2}))
-    sed_script+="s|{{ ${key}_rgb }}|${r},${g},${b}|g;"
+    echo "s|{{ ${key}_rgb }}|${r},${g},${b}|g" >> "$sed_file"
   fi
 done < "$COLORS_FILE"
 
@@ -57,7 +59,7 @@ process_templates() {
       continue
     fi
 
-    sed "$sed_script" "$tpl" > "$THEME_DIR/$filename"
+    sed -f "$sed_file" "$tpl" > "$THEME_DIR/$filename"
   done
 }
 
