@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
+source "${CONFIG_DIR}/theme/catppuccin.sh"
 
 # Fetch open PRs authored by me across all repos
 PRS=$(gh search prs --author @me --state open --json number,repository,url,title 2>/dev/null)

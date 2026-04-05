@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
+source "${CONFIG_DIR}/theme/catppuccin.sh"
 
 # Gmail credentials file (create this with your email and app password)
 CREDENTIALS_FILE="$HOME/.config/sketchybar/gmail_credentials"

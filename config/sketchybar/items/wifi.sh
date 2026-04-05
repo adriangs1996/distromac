@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
+source "${CONFIG_DIR}/theme/catppuccin.sh"
 
 # WiFi status item - Orange/Coral for left bracket
 sketchybar --add item wifi_status left \

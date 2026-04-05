@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
+source "${CONFIG_DIR}/theme/catppuccin.sh"
 
 # Get GitHub notification count using gh CLI
 COUNT=$(gh api notifications 2>/dev/null | jq '. | length' 2>/dev/null)

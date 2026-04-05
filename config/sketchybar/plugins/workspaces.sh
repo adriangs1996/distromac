@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
+source "${CONFIG_DIR}/theme/catppuccin.sh"
 source "${CONFIG_DIR}/scripts/app-font-fn.sh"
 
 _SSDF_WS_ID=$1

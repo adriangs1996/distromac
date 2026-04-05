@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # items/workspace.sh — single workspace number in the center island
 
-source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
+source "${CONFIG_DIR}/theme/catppuccin.sh"
 
 sketchybar --add event aerospace_workspace_change
 

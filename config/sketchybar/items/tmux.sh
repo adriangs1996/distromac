@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # items/tmux.sh — tmux sessions and active window items for center island
 
-source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
+source "${CONFIG_DIR}/theme/catppuccin.sh"
 
 # Tmux sessions segment (middle of segmented bar)
 sketchybar --add item tmux_sessions center \
