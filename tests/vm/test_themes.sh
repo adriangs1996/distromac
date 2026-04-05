@@ -161,6 +161,20 @@ while IFS= read -r theme; do
     assert_file_exists "[$theme] nvim theme.lua deployed" "$HOME/.config/nvim/lua/distromac/theme.lua"
   fi
 
+  # Wallpaper — verify theme ships one and it landed in staging
+  wallpaper_found=false
+  for ext in png jpg jpeg; do
+    if [[ -f "$THEME_OUT/wallpaper.$ext" ]]; then
+      wallpaper_found=true
+      break
+    fi
+  done
+  if [[ $wallpaper_found == true ]]; then
+    _pass "[$theme] wallpaper in staging"
+  else
+    _fail "[$theme] wallpaper in staging" "wallpaper.{png,jpg,jpeg} to exist" "not found"
+  fi
+
   # 7. Deployed files match staging
   # Physical copies
   assert_files_equal "[$theme] bat staging == deployed" "$THEME_OUT/bat" "$HOME/.config/bat/config"
