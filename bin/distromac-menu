@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+set -eEo pipefail
+
+DISTROMAC_PATH="${DISTROMAC_PATH:-$HOME/.distromac}"
+export PATH="$DISTROMAC_PATH/bin:$PATH"
+
+# --- Startup ---
+
+# Set terminal title for Aerospace floating detection
+printf '\033]0;distromac-menu\007'
+
+# Check fzf dependency
+if ! command -v fzf &>/dev/null; then
+  echo "Error: fzf is required. Run: brew install fzf" >&2
+  echo ""
+  echo "Press any key to close..."
+  read -rsn1
+  exit 1
+fi
+
+# Toggle: close existing menu if already running
+toggle_existing_menu() {
+  local pidfile="/tmp/distromac-menu.pid"
+  if [[ -f $pidfile ]] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+    kill "$(cat "$pidfile")"
+    rm -f "$pidfile"
+    exit 0
+  fi
+  echo $$ > "$pidfile"
+  trap 'rm -f "$pidfile"' EXIT
+}
+
+toggle_existing_menu
+
+# Load theme colors for fzf styling
+load_theme_colors() {
+  local colors_file="$HOME/.config/distromac/current/theme/colors.toml"
+
+  # Defaults if no theme is set
+  fg="#cdd6f4"
+  bg="#1e1e2e"
+  accent="#bb9af7"
+  surface1="#45475a"
+
+  [[ ! -f $colors_file ]] && return
+
+  while IFS='=' read -r key value; do
+    [[ $key =~ ^[[:space:]]*# ]] && continue
+    [[ -z $key ]] && continue
+    key=$(echo "$key" | xargs)
+    value=$(echo "$value" | xargs | sed 's/^"//;s/"$//' | xargs)
+    case $key in
+      foreground) fg="$value" ;;
+      background) bg="$value" ;;
+      accent)     accent="$value" ;;
+      surface1)   surface1="$value" ;;
+    esac
+  done < "$colors_file"
+}
+
+load_theme_colors
+
+# --- Core Helpers ---
+
+BACK_TO_EXIT=false
+
+menu() {
+  local prompt="$1"
+  local options="$2"
+  echo -e "$options" | fzf --prompt " $prompt > " \
+    --height=100% --layout=reverse \
+    --border=rounded --margin=1,2 \
+    --no-info --no-scrollbar \
+    --color="fg:$fg,bg:$bg,hl:$accent,fg+:$bg,bg+:$accent,pointer:$accent,prompt:$accent,border:$surface1,header:$accent"
+}
+
+run_and_wait() {
+  echo ""
+  "$@"
+  echo ""
+  echo "Press any key to close..."
+  read -rsn1
+}
+
+back_to() {
+  local parent_menu="$1"
+  if [[ $BACK_TO_EXIT == "true" ]]; then
+    exit 0
+  elif [[ -n $parent_menu ]]; then
+    "$parent_menu"
+  else
+    show_main_menu
+  fi
+}
+
+# --- Main Menu ---
+
+show_main_menu() {
+  case $(menu "Menu" "󰸌  Style\n  Setup\n  Update\n  System") in
+    *Style*)  show_style_menu ;;
+    *Setup*)  show_setup_menu ;;
+    *Update*) show_update_menu ;;
+    *System*) show_system_menu ;;
+    *)        exit 0 ;;
+  esac
+}
+
+# Submenu stubs — implemented in subsequent tasks
+show_style_menu()  { show_main_menu; }
+show_setup_menu()  { show_main_menu; }
+show_update_menu() { show_main_menu; }
+show_system_menu() { show_main_menu; }
+
+# Allow user extensions
+USER_EXTENSIONS="$HOME/.config/distromac/extensions/menu.sh"
+[[ -f $USER_EXTENSIONS ]] && source "$USER_EXTENSIONS"
+
+# Direct submenu access
+if [[ -n $1 ]]; then
+  BACK_TO_EXIT=true
+  case "${1,,}" in
+    style)  show_style_menu ;;
+    setup)  show_setup_menu ;;
+    update) show_update_menu ;;
+    system) show_system_menu ;;
+    *)      show_main_menu ;;
+  esac
+else
+  show_main_menu
+fi
