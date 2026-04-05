@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "${CONFIG_DIR}/theme/catppuccin.sh"
+source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
 
 # Memory item - Yellow
 sketchybar --add item mem left \

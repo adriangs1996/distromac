@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "${CONFIG_DIR}/theme/catppuccin.sh"
+source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
 
 COLOR="${_SSDF_CM_GREEN}"
 

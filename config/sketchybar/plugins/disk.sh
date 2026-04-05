@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-source "${CONFIG_DIR}/theme/catppuccin.sh"
+source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
 
 # Get available disk space in GiB format (like waybar)
 AVAILABLE=$(df -Pk / | tail -1 | awk '{print $4}')

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source "${CONFIG_DIR}/theme/catppuccin.sh"
+source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
 
 # Check if Spotify is running
 if ! pgrep -x "Spotify" > /dev/null; then

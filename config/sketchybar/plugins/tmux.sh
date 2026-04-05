@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # plugins/tmux.sh — queries tmux for sessions and builds labels
 
-source "${CONFIG_DIR}/theme/catppuccin.sh"
+source "$HOME/.config/distromac/current/theme/sketchybar-theme.sh"
 
 MAX_LABEL_LEN=50
 
