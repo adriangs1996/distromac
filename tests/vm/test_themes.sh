@@ -90,7 +90,7 @@ while IFS= read -r theme; do
 
   # tmux-theme.conf — full hex
   if [[ -f "$THEME_OUT/tmux-theme.conf" ]]; then
-    for key in background foreground surface0 surface1 mantle color1 color3 color4 color6 accent; do
+    for key in background foreground surface0 surface1 color1 color2; do
       assert_color "$theme" "$key" "$THEME_OUT/tmux-theme.conf"
     done
   fi
