@@ -15,6 +15,9 @@ if [[ ! -d $OFFICIAL_DIR ]] && [[ ! -d $USER_DIR ]]; then
   exit 1
 fi
 
+# Pre-theme hook
+distromac-hook pre-theme "$THEME_NAME" || true
+
 # 2. Create next-theme staging directory
 mkdir -p "$CURRENT_DIR"
 rm -rf "$CURRENT_DIR/next-theme"
@@ -96,7 +99,7 @@ if command -v bat &>/dev/null; then
   bat cache --build &>/dev/null || true
 fi
 
-# 11. Run hook
-distromac-hook theme-set "$THEME_NAME" || true
+# 11. Post-theme hook
+distromac-hook post-theme "$THEME_NAME" || true
 
 echo "Theme set to: $THEME_NAME"

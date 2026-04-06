@@ -53,6 +53,9 @@ echo "  ║        d i s t r o m a c     ║"
 echo "  ╚══════════════════════════════╝"
 echo ""
 
+# 0. Pre-install hook
+distromac-hook pre-install || true
+
 # 1. Preflight
 source "$DISTROMAC_PATH/install/preflight/guard.sh"
 source "$DISTROMAC_PATH/install/preflight/xcode.sh"
@@ -83,3 +86,6 @@ source "$DISTROMAC_PATH/install/config/theme.sh"
 
 # 4. Post-install
 source "$DISTROMAC_PATH/install/post-install/cleanup.sh"
+
+# 5. Post-install hook
+distromac-hook post-install || true
