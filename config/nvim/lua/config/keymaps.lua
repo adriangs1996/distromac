@@ -7,6 +7,10 @@ vim.keymap.set("n", "<leader>fS", ":w<CR>", { desc = "[S]ave file" })
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
+vim.keymap.set("n", "C-d", "<C-d>zz")
+vim.keymap.set("n", "C-u", "<C-u>zz")
+vim.keymap.set("x", "p", [["_dP]], { desc = "Paste without overwriting register" })
+
 local letters = "abcdefghijklmnopqrstuvwxyz"
 for i = 1, #letters do
   local letter = letters:sub(i, i)
@@ -39,5 +43,21 @@ local function toggle_statusline()
     vim.notify("Statusline hidden")
   end
 end
+vim.o.laststatus = 0
 
 vim.keymap.set("n", "<leader>ue", toggle_statusline, { desc = "Toggle statusline" })
+vim.keymap.set("n", "j", function()
+  if vim.v.count == 0 then
+    return "gj"
+  else
+    return "j"
+  end
+end, { expr = true, desc = "Move down" })
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "rust",
+  callback = function()
+    vim.keymap.set("n", "<leader>t", "<cmd>lua vim.cmd('RustLsp testables')<CR>", { desc = "Run Rust tests" })
+    vim.keymap.set("n", "<leader>T", "<cmd>lua vim.cmd('RustTest')<CR>", { desc = "Run test under cursor" })
+  end,
+})
