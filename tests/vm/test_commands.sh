@@ -68,8 +68,45 @@ if brew list --cask font-jetbrains-mono-nerd-font &>/dev/null 2>&1; then
   assert_exit_nonzero "cask-missing all present" distromac-cask-missing font-jetbrains-mono-nerd-font
 fi
 
-# --- distromac-hook (no-op if no hooks dir) ---
-assert_exit_0 "hook exits 0" distromac-hook test-event
+# --- distromac-hook ---
+# No-op when hook doesn't exist
+assert_exit_0 "hook no-op for missing hook" distromac-hook test-event
+
+# Create all 4 hooks, verify they execute and receive args
+HOOKS_DIR="$HOME/.config/distromac/hooks"
+mkdir -p "$HOOKS_DIR"
+
+for hook in pre-install post-install pre-theme post-theme; do
+  cat > "$HOOKS_DIR/$hook" << 'HOOKEOF'
+#!/usr/bin/env bash
+echo "$0 $*" >> /tmp/distromac-hook-log
+HOOKEOF
+  chmod +x "$HOOKS_DIR/$hook"
+done
+
+# Clear log
+rm -f /tmp/distromac-hook-log
+
+# Test pre-theme and post-theme (fired by theme-set)
+current_theme=$(distromac-theme-current)
+distromac-theme-set "$current_theme" >/dev/null 2>&1
+
+assert_file_exists "hook log created" /tmp/distromac-hook-log
+assert_contains "pre-theme hook fired" "pre-theme" /tmp/distromac-hook-log
+assert_contains "post-theme hook fired" "post-theme" /tmp/distromac-hook-log
+assert_contains "pre-theme receives theme arg" "pre-theme $current_theme" /tmp/distromac-hook-log
+assert_contains "post-theme receives theme arg" "post-theme $current_theme" /tmp/distromac-hook-log
+
+# Test pre-install and post-install (fired by install.sh)
+rm -f /tmp/distromac-hook-log
+bash "$DISTROMAC_PATH/install.sh" >/dev/null 2>&1 || true
+
+assert_contains "pre-install hook fired" "pre-install" /tmp/distromac-hook-log
+assert_contains "post-install hook fired" "post-install" /tmp/distromac-hook-log
+
+# Cleanup
+rm -f /tmp/distromac-hook-log
+rm -f "$HOOKS_DIR"/{pre-install,post-install,pre-theme,post-theme}
 
 # --- distromac-migrate (no pending migrations in fresh VM) ---
 assert_exit_0 "migrate exits 0" bash -c "distromac-migrate < /dev/null"
