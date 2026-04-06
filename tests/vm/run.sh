@@ -14,7 +14,7 @@ TEST_SUITE="${DISTROMAC_TEST_SUITE:-}"
 
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
-SSH_OPTS=(-o StrictHostKeyChecking=no -o ConnectTimeout=5 -o LogLevel=ERROR)
+SSH_OPTS=(-o StrictHostKeyChecking=no -o ConnectTimeout=5 -o LogLevel=ERROR -o PubkeyAuthentication=no)
 
 # --- Prerequisite checks ---
 if ! command -v tart &>/dev/null; then
