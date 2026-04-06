@@ -1,7 +1,3 @@
--- Keymaps are automatically loaded on the VeryLazy event
--- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
--- Add any additional keymaps here
-
 vim.keymap.set("n", "<leader>fs", ":wa<CR>", { desc = "[S]ave file" })
 vim.keymap.set("n", "<leader>fS", ":w<CR>", { desc = "[S]ave file" })
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
@@ -32,7 +28,6 @@ vim.keymap.set("n", "<C-l>", ":TmuxNavigateRight<CR>")
 vim.keymap.set("n", "<C-k>", ":TmuxNavigateUp<CR>")
 vim.keymap.set("n", "<C-j>", ":TmuxNavigateDown<CR>")
 
--- toggle statusline
 local function toggle_statusline()
   local current_status = vim.o.laststatus
   if current_status == 0 then

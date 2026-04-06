@@ -1,31 +1,7 @@
-# ╔══════════════════════════════════════════════════════════════════════════════╗
-# ║  █▀▀ ▄▀█ ▀█▀ █▀█ █▀█ █ █ █▀▀ █▀▀ █ █▄ █                                    ║
-# ║  █▄▄ █▀█  █  █▀▀ █▀▀ █▄█ █▄▄ █▄▄ █ █ ▀█                                    ║
-# ║  ─────────────────────────────────────────────────────────────────────────   ║
-# ║  MOCHA VARIANT // Based on catppuccin/catppuccin                            ║
-# ║  "Soothing pastel theme for the high-spirited!"                             ║
-# ╚══════════════════════════════════════════════════════════════════════════════╝
-#
-# DESIGN PHILOSOPHY:
-# - Warm, soothing pastels on a deep base
-# - Balanced accent colors with excellent readability
-# - Inspired by the Catppuccin community palette
-#
-# REQUIRES: Nerd Font v3.0+ (FiraCode Nerd Font, JetBrains Mono Nerd Font, etc.)
-
 "$schema" = 'https://starship.rs/config-schema.json'
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PALETTE - Catppuccin Mocha
-# ══════════════════════════════════════════════════════════════════════════════
-
 add_newline = false
-# Palette is managed by distromac-theme-set (merged from themed template)
 palette = "distromac"
-
-# ══════════════════════════════════════════════════════════════════════════════
-# PROMPT ARCHITECTURE
-# ══════════════════════════════════════════════════════════════════════════════
 
 format = """\
 [λ](cyan)\
@@ -43,10 +19,6 @@ $status\
 
 [line_break]
 disabled = true
-
-# ══════════════════════════════════════════════════════════════════════════════
-# CORE INTERFACE
-# ══════════════════════════════════════════════════════════════════════════════
 
 [character]
 format = "$symbol "
@@ -74,10 +46,6 @@ home_symbol = "~"
 use_os_path_sep = true
 
 [directory.substitutions]
-
-# ══════════════════════════════════════════════════════════════════════════════
-# VERSION CONTROL
-# ══════════════════════════════════════════════════════════════════════════════
 
 [git_branch]
 format = "[$branch(:$remote_branch)](blue)"
@@ -128,10 +96,6 @@ staged = "+"
 renamed = "»"
 deleted = "✘"
 
-# ══════════════════════════════════════════════════════════════════════════════
-# UTILITIES
-# ══════════════════════════════════════════════════════════════════════════════
-
 [cmd_duration]
 format = "[ · ](fg_gutter)[$duration](yellow)"
 style = "yellow"
@@ -160,10 +124,6 @@ style = "red"
 map_symbol = true
 recognize_signal_code = true
 disabled = false
-
-# ══════════════════════════════════════════════════════════════════════════════
-# DISABLED MODULES
-# ══════════════════════════════════════════════════════════════════════════════
 
 [aws]
 disabled = true
@@ -248,7 +208,3 @@ disabled = true
 
 [c]
 disabled = true
-
-# ══════════════════════════════════════════════════════════════════════════════
-# CUSTOM MODULES
-# ══════════════════════════════════════════════════════════════════════════════
