@@ -19,6 +19,7 @@
 # PALETTE - Catppuccin Mocha
 # ══════════════════════════════════════════════════════════════════════════════
 
+add_newline = false
 # Palette is managed by distromac-theme-set (merged from themed template)
 palette = "distromac"
 
@@ -26,36 +27,29 @@ palette = "distromac"
 # PROMPT ARCHITECTURE
 # ══════════════════════════════════════════════════════════════════════════════
 
-format = """
-[┌─](dark3)\
+format = """\
+[λ](cyan)\
+[ · ](fg_gutter)\
 $directory\
-[─](dark3)\
 $git_branch\
 $git_commit\
 $git_state\
 $git_status\
 $git_metrics\
-[─](dark3)\
-$fill\
 $cmd_duration\
-[─┐](dark3)\
-$line_break\
-[└─](dark3)\
 $jobs\
 $status\
-[─](dark3)\
-$character"""
+ $character"""
 
-right_format = ""
-
-# Continuation prompt
-continuation_prompt = "[│ ](dark3)[∵](blue) "
+[line_break]
+disabled = true
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CORE INTERFACE
 # ══════════════════════════════════════════════════════════════════════════════
 
 [character]
+format = "$symbol "
 success_symbol = "[❯](bold green)"
 error_symbol = "[❯](bold red)"
 vimcmd_symbol = "[◀](bold cyan)"
@@ -70,9 +64,9 @@ disabled = true
 disabled = true
 
 [directory]
-format = "[\\[](dark3)[λ](cyan)[:](dark3)[$read_only]($read_only_style)[$path](bold blue)[\\]](dark3)"
-style = "bold blue"
-read_only = "󰌾"
+format = "[$read_only]($read_only_style)[$path](bold green)[ · ](fg_gutter)"
+style = "bold green"
+read_only = "󰌾 "
 read_only_style = "red"
 truncation_length = 0
 truncate_to_repo = false
@@ -86,15 +80,15 @@ use_os_path_sep = true
 # ══════════════════════════════════════════════════════════════════════════════
 
 [git_branch]
-format = "[\\[](dark3)[±](magenta)[:](dark3)[$branch(:$remote_branch)](magenta)[\\]](dark3)"
+format = "[$branch(:$remote_branch)](blue)"
 symbol = ""
-style = "magenta"
+style = "blue"
 truncation_length = 20
 truncation_symbol = "…"
 only_attached = false
 
 [git_commit]
-format = '[⟨$hash$tag⟩](comment)'
+format = '[ · ](fg_gutter)[$hash$tag](comment)'
 style = "comment"
 commit_hash_length = 7
 tag_symbol = "󰓹"
@@ -102,11 +96,11 @@ only_detached = true
 tag_disabled = false
 
 [git_state]
-format = '[\[](dark3)[$state($progress_current/$progress_total)](bold yellow)[\]](dark3)'
+format = '[ · ](fg_gutter)[$state($progress_current/$progress_total)](bold yellow)'
 style = "bold yellow"
-rebase = "󰳖REB"
-merge = "󰘭MRG"
-revert = "󰕌REV"
+rebase = "󰳖 REB"
+merge = "󰘭 MRG"
+revert = "󰕌 REV"
 cherry_pick = "CHR"
 bisect = "BIS"
 am = "AM"
@@ -139,24 +133,23 @@ deleted = "✘"
 # ══════════════════════════════════════════════════════════════════════════════
 
 [cmd_duration]
-format = "[\\[](dark3)[⚡](yellow)[:](dark3)[$duration](yellow)[\\]](dark3)"
+format = "[ · ](fg_gutter)[$duration](yellow)"
 style = "yellow"
 min_time = 2_000
 show_milliseconds = false
 
 [fill]
-symbol = "─"
-style = "dark3"
+disabled = true
 
 [jobs]
-format = "[\\[](dark3)[󰜎](purple)[:](dark3)[$number](purple)[\\]](dark3)"
+format = "[ · ](fg_gutter)[󰜎 $number](purple)"
 symbol = ""
 style = "purple"
 number_threshold = 1
 symbol_threshold = 1
 
 [status]
-format = '[[\[](dark3)[✘](red)[:](dark3)[$status](red)[\]](dark3)]($style)'
+format = '[ · ](fg_gutter)[✘ $status](red)'
 symbol = ""
 success_symbol = ""
 not_executable_symbol = "󰂭"
@@ -259,4 +252,3 @@ disabled = true
 # ══════════════════════════════════════════════════════════════════════════════
 # CUSTOM MODULES
 # ══════════════════════════════════════════════════════════════════════════════
-
