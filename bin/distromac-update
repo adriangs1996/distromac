@@ -19,22 +19,31 @@ if [[ -n $current_theme ]] && [[ $current_theme != "No theme set" ]]; then
   distromac-theme-set "$current_theme"
 fi
 
-# Re-symlink user dotfiles
+# Re-symlink user dotfiles (mirror approach: dirs created, only files symlinked)
 USER_DOTFILES="$HOME/.config/distromac/dotfiles"
 if [[ -d $USER_DOTFILES ]]; then
-  for src in "$USER_DOTFILES"/.* "$USER_DOTFILES"/*; do
-    [[ ! -e $src ]] && continue
-    fname=$(basename "$src")
-    [[ $fname == "." || $fname == ".." ]] && continue
-    target="$HOME/$fname"
-    # Skip if already correctly linked
-    if [[ -L $target ]] && [[ "$(readlink "$target")" == "$src" ]]; then
-      continue
-    fi
-    [[ -e $target ]] && mv "$target" "${target}.distromac-backup.$(date +%s)"
-    ln -s "$src" "$target"
-    echo "Linked ~/$fname"
-  done
+  _link_dotfiles() {
+    local src_dir="$1" target_dir="$2"
+    for src in "$src_dir"/.* "$src_dir"/*; do
+      [[ ! -e $src ]] && continue
+      local fname
+      fname=$(basename "$src")
+      [[ $fname == "." || $fname == ".." ]] && continue
+      local target="$target_dir/$fname"
+      if [[ -d $src ]]; then
+        mkdir -p "$target"
+        _link_dotfiles "$src" "$target"
+      else
+        if [[ -L $target ]] && [[ "$(readlink "$target")" == "$src" ]]; then
+          continue
+        fi
+        [[ -e $target ]] && mv "$target" "${target}.distromac-backup.$(date +%s)"
+        ln -s "$src" "$target"
+        echo "Linked ~/${target#$HOME/}"
+      fi
+    done
+  }
+  _link_dotfiles "$USER_DOTFILES" "$HOME"
 fi
 
 # Run hook

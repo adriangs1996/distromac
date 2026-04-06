@@ -64,27 +64,40 @@ fi
 echo 'source-file ~/.config/tmux/tmux.conf' > "$HOME/.tmux.conf"
 log_success ".tmux.conf configured"
 
-# User dotfiles: symlink ~/.config/distromac/dotfiles/* into $HOME
+# User dotfiles: mirror ~/.config/distromac/dotfiles/ into $HOME
+# Uses stow-like approach: directories are created, only leaf files are symlinked.
+# This merges safely with distromac-managed configs (e.g., nvim, tmux).
 USER_DOTFILES="$HOME/.config/distromac/dotfiles"
 if [[ -d $USER_DOTFILES ]]; then
-  for src in "$USER_DOTFILES"/.*  "$USER_DOTFILES"/*; do
-    [[ ! -e $src ]] && continue
-    fname=$(basename "$src")
-    # Skip . and ..
-    [[ $fname == "." || $fname == ".." ]] && continue
+  _link_dotfiles() {
+    local src_dir="$1" target_dir="$2"
+    for src in "$src_dir"/.* "$src_dir"/*; do
+      [[ ! -e $src ]] && continue
+      local fname
+      fname=$(basename "$src")
+      [[ $fname == "." || $fname == ".." ]] && continue
 
-    target="$HOME/$fname"
+      local target="$target_dir/$fname"
 
-    # Backup existing (skip if already a symlink to the same source)
-    if [[ -L $target ]] && [[ "$(readlink "$target")" == "$src" ]]; then
-      continue
-    fi
-    if [[ -e $target ]]; then
-      mv "$target" "${target}.distromac-backup.${TIMESTAMP}"
-      log_info "Backed up ~/$fname"
-    fi
-
-    ln -s "$src" "$target"
-    log_success "Linked ~/$fname → dotfiles/$fname"
-  done
+      if [[ -d $src ]]; then
+        # Directory: create if needed, then recurse (never symlink dirs)
+        mkdir -p "$target"
+        _link_dotfiles "$src" "$target"
+      else
+        # File: symlink (skip if already correctly linked)
+        if [[ -L $target ]] && [[ "$(readlink "$target")" == "$src" ]]; then
+          continue
+        fi
+        if [[ -e $target ]]; then
+          mv "$target" "${target}.distromac-backup.${TIMESTAMP}"
+          local rel="${target#$HOME/}"
+          log_info "Backed up ~/$rel"
+        fi
+        ln -s "$src" "$target"
+        local rel="${target#$HOME/}"
+        log_success "Linked ~/$rel"
+      fi
+    done
+  }
+  _link_dotfiles "$USER_DOTFILES" "$HOME"
 fi

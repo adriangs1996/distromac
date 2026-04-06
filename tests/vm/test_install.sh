@@ -95,24 +95,50 @@ fi
 
 assert_eq "theme is $expected_theme" "$expected_theme" "$(cat "$HOME/.config/distromac/current/theme.name")"
 
-# --- Phase 6: User dotfiles ---
-# Create a test dotfile, re-run install, verify it's symlinked
-mkdir -p "$HOME/.config/distromac/dotfiles"
-echo "test-content" > "$HOME/.config/distromac/dotfiles/.testrc"
+# --- Phase 6: User dotfiles (mirror/stow approach) ---
+DOTFILES_SRC="$HOME/.config/distromac/dotfiles"
+mkdir -p "$DOTFILES_SRC"
 
-# Source dotfiles.sh directly (install already ran; just test the dotfiles logic)
+# Test 1: flat file in $HOME
+echo "flat-content" > "$DOTFILES_SRC/.testrc"
+
+# Test 2: nested directory (e.g., zellij-like config)
+mkdir -p "$DOTFILES_SRC/.config/zellij"
+echo "layout {}" > "$DOTFILES_SRC/.config/zellij/config.kdl"
+
+# Test 3: file inside distromac-managed dir (merge, don't clobber)
+mkdir -p "$DOTFILES_SRC/.config/nvim/lua"
+echo "-- user custom" > "$DOTFILES_SRC/.config/nvim/lua/custom.lua"
+
+# Source dotfiles.sh
 TIMESTAMP=$(date +%s)
 source "$DISTROMAC_PATH/install/helpers/logging.sh"
 source "$DISTROMAC_PATH/install/config/dotfiles.sh"
 
-assert_file_exists "dotfile symlinked" "$HOME/.testrc"
-assert_eq "dotfile is a symlink" "true" "$([ -L "$HOME/.testrc" ] && echo true || echo false)"
-assert_contains "dotfile has correct content" "test-content" "$HOME/.testrc"
+# Flat file
+assert_file_exists "flat dotfile symlinked" "$HOME/.testrc"
+assert_eq "flat dotfile is symlink" "true" "$([ -L "$HOME/.testrc" ] && echo true || echo false)"
+assert_contains "flat dotfile content" "flat-content" "$HOME/.testrc"
 
-# Idempotent: run again, should not create backup (already linked)
+# Nested directory: dir created, leaf file symlinked
+assert_dir_exists "zellij config dir created" "$HOME/.config/zellij"
+assert_file_exists "zellij config symlinked" "$HOME/.config/zellij/config.kdl"
+assert_eq "zellij config is symlink" "true" "$([ -L "$HOME/.config/zellij/config.kdl" ] && echo true || echo false)"
+assert_contains "zellij config content" "layout {}" "$HOME/.config/zellij/config.kdl"
+
+# Merge with distromac dir: nvim dir still exists with distromac files + user file
+assert_dir_exists "nvim dir preserved" "$HOME/.config/nvim/lua"
+assert_file_exists "user lua symlinked into nvim" "$HOME/.config/nvim/lua/custom.lua"
+assert_eq "user lua is symlink" "true" "$([ -L "$HOME/.config/nvim/lua/custom.lua" ] && echo true || echo false)"
+# distromac's own files should still be there
+assert_dir_exists "distromac nvim untouched" "$HOME/.config/nvim/lua/distromac"
+
+# Idempotent: run again, no backups created
 source "$DISTROMAC_PATH/install/config/dotfiles.sh"
-assert_file_missing "no duplicate backup" "$HOME/.testrc.distromac-backup.*"
+assert_file_missing "no flat backup on re-run" "$HOME/.testrc.distromac-backup.*"
 
 # Cleanup
 rm -f "$HOME/.testrc"
-rm -f "$HOME/.config/distromac/dotfiles/.testrc"
+rm -f "$HOME/.config/zellij/config.kdl" && rmdir "$HOME/.config/zellij" 2>/dev/null || true
+rm -f "$HOME/.config/nvim/lua/custom.lua"
+rm -rf "$DOTFILES_SRC"
