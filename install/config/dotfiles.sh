@@ -63,3 +63,28 @@ if [[ -f "$HOME/.tmux.conf" ]]; then
 fi
 echo 'source-file ~/.config/tmux/tmux.conf' > "$HOME/.tmux.conf"
 log_success ".tmux.conf configured"
+
+# User dotfiles: symlink ~/.config/distromac/dotfiles/* into $HOME
+USER_DOTFILES="$HOME/.config/distromac/dotfiles"
+if [[ -d $USER_DOTFILES ]]; then
+  for src in "$USER_DOTFILES"/.*  "$USER_DOTFILES"/*; do
+    [[ ! -e $src ]] && continue
+    fname=$(basename "$src")
+    # Skip . and ..
+    [[ $fname == "." || $fname == ".." ]] && continue
+
+    target="$HOME/$fname"
+
+    # Backup existing (skip if already a symlink to the same source)
+    if [[ -L $target ]] && [[ "$(readlink "$target")" == "$src" ]]; then
+      continue
+    fi
+    if [[ -e $target ]]; then
+      mv "$target" "${target}.distromac-backup.${TIMESTAMP}"
+      log_info "Backed up ~/$fname"
+    fi
+
+    ln -s "$src" "$target"
+    log_success "Linked ~/$fname → dotfiles/$fname"
+  done
+fi

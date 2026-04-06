@@ -94,3 +94,25 @@ if [[ "${DISTROMAC_TEST_FLAGS:-}" =~ --theme=([^ ]+) ]]; then
 fi
 
 assert_eq "theme is $expected_theme" "$expected_theme" "$(cat "$HOME/.config/distromac/current/theme.name")"
+
+# --- Phase 6: User dotfiles ---
+# Create a test dotfile, re-run install, verify it's symlinked
+mkdir -p "$HOME/.config/distromac/dotfiles"
+echo "test-content" > "$HOME/.config/distromac/dotfiles/.testrc"
+
+# Source dotfiles.sh directly (install already ran; just test the dotfiles logic)
+TIMESTAMP=$(date +%s)
+source "$DISTROMAC_PATH/install/helpers/logging.sh"
+source "$DISTROMAC_PATH/install/config/dotfiles.sh"
+
+assert_file_exists "dotfile symlinked" "$HOME/.testrc"
+assert_eq "dotfile is a symlink" "true" "$([ -L "$HOME/.testrc" ] && echo true || echo false)"
+assert_contains "dotfile has correct content" "test-content" "$HOME/.testrc"
+
+# Idempotent: run again, should not create backup (already linked)
+source "$DISTROMAC_PATH/install/config/dotfiles.sh"
+assert_file_missing "no duplicate backup" "$HOME/.testrc.distromac-backup.*"
+
+# Cleanup
+rm -f "$HOME/.testrc"
+rm -f "$HOME/.config/distromac/dotfiles/.testrc"

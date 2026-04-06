@@ -19,6 +19,24 @@ if [[ -n $current_theme ]] && [[ $current_theme != "No theme set" ]]; then
   distromac-theme-set "$current_theme"
 fi
 
+# Re-symlink user dotfiles
+USER_DOTFILES="$HOME/.config/distromac/dotfiles"
+if [[ -d $USER_DOTFILES ]]; then
+  for src in "$USER_DOTFILES"/.* "$USER_DOTFILES"/*; do
+    [[ ! -e $src ]] && continue
+    fname=$(basename "$src")
+    [[ $fname == "." || $fname == ".." ]] && continue
+    target="$HOME/$fname"
+    # Skip if already correctly linked
+    if [[ -L $target ]] && [[ "$(readlink "$target")" == "$src" ]]; then
+      continue
+    fi
+    [[ -e $target ]] && mv "$target" "${target}.distromac-backup.$(date +%s)"
+    ln -s "$src" "$target"
+    echo "Linked ~/$fname"
+  done
+fi
+
 # Run hook
 distromac-hook post-update || true
 
